@@ -1,0 +1,263 @@
+;; Default Color Theme
+;;(load-theme 'misterioso)
+(setq debug-on-error t)
+;; Prevent emacs from opening startup screen
+;; It changed the default directory, making any changes in .emacs innefective
+(setq inhibit-startup-screen t)
+
+;; Setting up default encoding
+(set-keyboard-coding-system 'iso-latin-1)
+
+;; elpa/org require
+(require 'package) 
+(add-to-list 'package-archives '("org" . "http://orgmode.org/elpa/") t)
+(package-initialize)
+
+;; Maximizing on startup
+(add-to-list 'initial-frame-alist '(fullscreen . maximized))
+
+;; Startup visibility orgmode
+(setq org-startup-folded 'content)
+;; https://stackoverflow.com/questions/23528287/how-to-display-custom-agenda-view-on-emacs-startup
+;; Open custom agenda on startup
+;;(add-hook 'window-setup-hook (lambda () (org-agenda nil "c")))
+
+;; The following lines are always needed.
+(require 'org)
+(require 'org-habit)
+(global-set-key "\C-cl" 'org-store-link)
+(global-set-key "\C-ca" 'org-agenda)
+(global-set-key "\C-cc" 'org-capture)
+
+
+;; Emacs GUI config
+(setq-default fill-column 80)
+(setq truncate-lines nil)
+
+;; Allow correct portuguese characters
+(require 'iso-transl)
+
+;; Set line wrapping as default for latex files
+(add-hook 'LaTeX-mode-hook #'visual-line-mode)
+
+;; Orgomode configuration
+(setq org-log-done 'time)
+(setq org-log-done t)
+(setq org-startup-indented t)
+
+;; org roam configuration
+(use-package org-journal
+  :bind
+  ("C-c n j" . org-journal-new-entry)
+  :custom
+  (org-journal-date-prefix "#+TITLE: ")
+  (org-journal-file-format "%Y-%m-%d.org")
+  (org-journal-dir "~/Dropbox/orgs/roam/")
+  (org-journal-date-format "%Y-%m-%d"))
+
+;; delft
+(use-package deft
+  :after org
+  :bind
+  ("C-c n d" . deft)
+  :custom
+  (deft-recursive t)
+  (deft-use-filter-string-for-filename t)
+  (deft-default-extension "org")
+  (deft-directory "~/Dropbox/orgs/roam/"))
+
+;; org roam
+(use-package org-roam
+      :hook
+      (after-init . org-roam-mode)
+      :custom
+      (org-roam-directory "~/Dropbox/orgs/roam/")
+      :bind (:map org-roam-mode-map
+              (("C-c n l" . org-roam)
+               ("C-c n f" . org-roam-find-file)
+               ("C-c n b" . org-roam-switch-to-buffer)
+               ("C-c n g" . org-roam-graph-show))
+              :map org-mode-map
+              (("C-c n i" . org-roam-insert))))
+
+(add-hook 'after-init-hook 'org-roam-mode)
+
+;; org babel
+;; active Babel languages
+(with-eval-after-load 'org
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   '((shell . t)
+     (python . t)
+     (R . t)))
+)
+
+(defun my-org-confirm-babel-evaluate (lang body)
+  (not (or (string= lang "shell")
+  (string= lang "R")
+  (string= lang "python")
+  (string= lang "latex")
+  (string= lang "maxima")
+  (string= lang "octave")
+  (string= lang "matlab")
+  (string= lang "lilypond")
+  (string= lang "sqlite"))))  ;don't ask for shell
+(setq org-confirm-babel-evaluate #'my-org-confirm-babel-evaluate)
+
+
+;;Task types orgmode
+;; https://www.rapidtables.com/web/color/html-color-codes.html
+;; https://www.rapidtables.com/web/color/html-color-codes.html
+
+;; Default emacs folder
+(cd (concat (getenv "HOME") "/Dropbox/orgs/"))
+
+;; Setup agenda files
+(setq org-agenda-files (list "~/Dropbox/orgs/work.org"
+                             "~/Dropbox/orgs/university.org"
+			     "~/Dropbox/orgs/personal.org"
+                             "~/Dropbox/orgs/projects.org"))
+
+;; Defining default files and cofig based on system
+(when (eq system-type 'windows-nt)
+	(find-file "work.org")
+	(set-face-attribute 'default nil :height 110)
+)
+(when (eq system-type 'gnu/linux)
+	(find-file "projects.org")
+	(set-face-attribute 'default nil :family "Ubuntu Mono" :height 130)
+  ;; Tell emacs where is your personal elisp lib dir
+  (add-to-list 'load-path "~/.emacs.d/lisp/")
+
+)
+
+;; Modify agenda view to show todo list
+;; https://blog.aaronbieber.com/2016/09/24/an-agenda-for-life-with-org-mode.html
+(setq org-agenda-custom-commands
+      '(("c" "Simple agenda view"
+         ((tags "PRIORITY=\"A\""
+                ((org-agenda-skip-function '(org-agenda-skip-entry-if 'todo 'done))
+                 (org-agenda-overriding-header "High-priority unfinished tasks:")))
+          (agenda "")
+          (alltodo "")))))
+
+;; Make org agenda show shceduled/recurring tasks done when due
+(setq org-agenda-log-mode-items '(closed clock state))
+		  
+;; ido-mode configuration
+(ido-mode)
+(setq org-completion-use-ido t)
+(setq ido-use-filename-at-point 'guess)
+
+;; Hugo orgmode exporter
+(with-eval-after-load 'ox__
+  (require 'ox-hugo))
+(require 'org-hugo-auto-export-mode) ;If you want the auto-exporting on file saves
+(require 'org-tempo);Enable snippets expantions: ex <s +TAB or <q +TAB
+
+(with-eval-after-load 'org-capture
+  (defun org-hugo-new-subtree-post-capture-template ()
+    "Returns `org-capture' template string for new Hugo post.
+See `org-capture-templates' for more information."
+    (let* ((title (read-from-minibuffer "Post Title: ")) ;Prompt to enter the post title
+           (fname (org-hugo-slug title)))
+      (mapconcat #'identity
+                 `(
+                   ,(concat "* TODO " title)
+                   ":PROPERTIES:"
+                   ,(concat ":EXPORT_FILE_NAME: " (format-time-string "%Y-%m-%d-") fname)
+                   ":END:"
+                   "%?\n")          ;Place the cursor here finally
+                 "\n"))))
+
+;; org capture templates
+(setq org-capture-templates
+ '(
+   ("t" "Todo" entry (file+headline "~/Dropbox/orgs/organizer.org" "Tasks")
+        "* TODO %?\n")
+   ("R" "PMS Report" entry (file+headline "~/Dropbox/orgs/work.org" "PMS")
+"** TODO [#A] Relatório Mensal PMS Alegria -  [0%]
+:PROPERTIES:
+:ORDERED: t
+:END:
+*** TODO Baixar dados SCADA
+*** TODO Baixar logbook
+*** TODO Baixar event reports
+*** TODO Fazer update de banco de dados
+*** TODO Rodar perfa06.m
+*** TODO Rodar alarmfrequencyanalysis.m
+*** TODO Filtrar eventos relevantes e atuáveis
+*** TODO Verificar gearbox oil temperature
+*** TODO Rodar analise em R
+*** TODO Avaliar AL1
+*** TODO Avaliar AL2
+*** TODO Copiar dados das abas 2.7 e 2.8 para Excel dos parques
+*** TODO Criar capas para os relatórios
+*** TODO Elaborar sumários executivos
+*** TODO Reunião para correção dos sumarios
+*** TODO Merge relatórios, capas e sumários
+*** TODO Enviar relatorios")
+("h"                ;`org-capture' binding + h
+                 "Hugo post"
+                 entry
+                 ;; It is assumed that below file is present in `org-directory'
+                 ;; and that it has a "Blog Ideas" heading. It can even be a
+                 ;; symlink pointing to the actual location of all-posts.org!
+                 (file+olp "/home/guilherme/blog/content-org/posts.org" "blog")
+                 (function org-hugo-new-subtree-post-capture-template))
+;; https://karl-voit.at/2014/08/10/bookmarks-with-orgmode/
+;; many more capture templates
+  ("b" "Bookmark" entry (file+headline "~/notes.org" "Bookmarks")
+   "* %?\n:PROPERTIES:\n:CREATED: %U\n:END:\n\n" :empty-lines 1)
+;; many more capture templates
+))
+
+;; org refile config
+(setq org-refile-targets
+      '((nil :maxlevel . 3)
+        (org-agenda-files :maxlevel . 3)))
+
+;; Anaconda mode configuration
+;; Automatically enable anaconda-mode in all python buffers and eldoc-mode
+(add-hook 'python-mode-hook 'anaconda-mode)
+(add-hook 'python-mode-hook 'anaconda-eldoc-mode)
+
+;; ESS configuration
+(setq ess-use-auto-complete 'script-only)
+
+
+;; Melpa repository
+(require 'package)
+(let* ((no-ssl (and (memq system-type '(windows-nt ms-dos))
+                    (not (gnutls-available-p))))
+       (proto (if no-ssl "http" "https")))
+  ;; Comment/uncomment these two lines to enable/disable MELPA and MELPA Stable as desired
+  (add-to-list 'package-archives (cons "melpa" (concat proto "://melpa.org/packages/")) t)
+  ;;(add-to-list 'package-archives (cons "melpa-stable" (concat proto "://stable.melpa.org/packages/")) t)
+  (add-to-list 'package-archives
+           '("melpa-stable" . "http://stable.melpa.org/packages/") t)
+  (when (< emacs-major-version 24)
+    ;; For important compatibility libraries like cl-lib
+    (add-to-list 'package-archives '("gnu" . (concat proto "://elpa.gnu.org/packages/")))))
+
+;(add-to-list 'spacemacs-dark-theme "~/.emacs.d/elpa/spacemacs-theme-20180319.736")
+;;M-x customize-theme
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(custom-enabled-themes '(spacemacs-dark))
+ '(custom-safe-themes
+   '("fa2b58bb98b62c3b8cf3b6f02f058ef7827a8e497125de0254f56e373abee088" "bffa9739ce0752a37d9b1eee78fc00ba159748f50dc328af4be661484848e476" default))
+ '(package-selected-packages
+   '(use-package deft org-roam magit ox-hugo elpy spacemacs-theme rvm org-plus-contrib org-pdfview ess auto-complete anaconda-mode))
+ '(safe-local-variable-values '((org-hugo-auto-export-on-save . t))))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
+(set-face-attribute 'default (selected-frame) :height 100)
+
