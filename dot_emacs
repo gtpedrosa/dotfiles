@@ -1,9 +1,15 @@
 ;; Default Color Theme
 ;;(load-theme 'misterioso)
 (setq debug-on-error t)
+
 ;; Prevent emacs from opening startup screen
 ;; It changed the default directory, making any changes in .emacs innefective
 (setq inhibit-startup-screen t)
+
+;; Include org files folder and subfolders on emacs path
+;; source: https://www.emacswiki.org/emacs/LoadPath#toc1
+(let ((default-directory  "~/Dropbox/orgs"))
+  (normal-top-level-add-subdirs-to-load-path))
 
 ;; Setting up default encoding
 (set-keyboard-coding-system 'iso-latin-1)
