@@ -230,6 +230,8 @@ See `org-capture-templates' for more information."
 ;; ESS configuration
 (setq ess-use-auto-complete 'script-only)
 
+;; Disable eldoc globaly
+(global-eldoc-mode -1)
 
 ;; Melpa repository
 (require 'package)
