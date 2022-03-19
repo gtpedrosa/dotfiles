@@ -123,7 +123,9 @@ export EDITOR="$VISUAL"
 # Load pyenv automatically by adding
 # the following to ~/.bashrc:
 
-export PATH="/home/gtpedrosa/.pyenv/bin:$PATH"
+export PATH="/home/guilherme/.pyenv/bin:$PATH"
 eval "$(pyenv init -)"
 eval "$(pyenv virtualenv-init -)"
 
+# ssh-agent initialization through keychain
+eval $(keychain --eval --quiet --noask  github)
