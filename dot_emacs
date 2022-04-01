@@ -44,10 +44,6 @@
 (global-set-key "\C-ca" 'org-agenda)
 (global-set-key "\C-cc" 'org-capture)
 
-;; Fix "org-clock-kill-emacs-query: Symbol’s function definition is void: org-clocking-buffer" error
-;; source: https://www.reddit.com/r/emacs/comments/pnksfo/org_clocking_buffer_definition_is_void/
-(defun org-clocking-buffer (&rest _))
-
 ;; Emacs GUI config
 (setq-default fill-column 80)
 (setq truncate-lines nil)
