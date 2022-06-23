@@ -125,7 +125,7 @@
                  ;; It is assumed that below file is present in `org-directory'
                  ;; and that it has a "Blog Ideas" heading. It can even be a
                  ;; symlink pointing to the actual location of all-posts.org!
-                 (file+olp "~/Dropbox/orgs/posts.org" "blog")
+                 (file+olp "~/Projects/blog/hugo-blog/content-org/posts.org" "blog")
                  (function org-hugo-new-subtree-post-capture-template))
 ;; https://karl-voit.at/2014/08/10/bookmarks-with-orgmode/
 ;; many more capture templates

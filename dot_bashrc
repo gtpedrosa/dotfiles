@@ -123,7 +123,7 @@ export EDITOR="$VISUAL"
 # Load pyenv automatically by adding
 # the following to ~/.bashrc:
 
-export PATH="/home/guilherme/.pyenv/bin:$PATH"
+export PATH="/home/guilherme/.pyenv/bin:/home/guilherme/.local/bin:$PATH"
 eval "$(pyenv init -)"
 eval "$(pyenv virtualenv-init -)"
 
