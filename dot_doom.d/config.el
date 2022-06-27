@@ -170,6 +170,8 @@
 ;; numbers are disabled. For relative line numbers, set this to `relative'.
 (setq display-line-numbers-type t)
 
+;; Add Projects folder to projectile search path
+(setq projectile-project-search-path '("~/Projects/"))
 
 ;; Here are some additional functions/macros that could help you configure Doom:
 ;;
