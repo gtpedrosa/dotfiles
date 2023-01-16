@@ -129,3 +129,7 @@ eval "$(pyenv virtualenv-init -)"
 
 # ssh-agent initialization through keychain
 eval $(keychain --eval --quiet --noask  github)
+
+# virtualenv aliases
+alias va='source ./venv/bin/activate'
+alias vd='deactivate'
